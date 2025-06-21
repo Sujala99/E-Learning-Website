@@ -49,6 +49,9 @@ function App() {
         <Route path="/course/:courseId" element={< CourseDetailPage/>} />
         <Route path="/certificate/:courseId" element={<CertificatePage />} />
 
+
+        <Route path="/comment" element={<Comment />} />
+
         {/* <Route path="*" element={<div>404 - Page Not Found</div>} /> */}
       </Routes>
     </Router>

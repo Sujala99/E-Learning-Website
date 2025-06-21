@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useUserContext } from "../../context/UserContext";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
+import Review from '../../components/Review/Review'; // Import the Review component
 
 function CourseDetailPage() {
   const { user } = useUserContext();
   const { courseId } = useParams();
-  const navigate = useNavigate(); // Use useNavigate hook
+  const navigate = useNavigate();
   const [courseDetails, setCourseDetails] = useState(null);
   const [currentLectureIndex, setCurrentLectureIndex] = useState(0);
   const [progress, setProgress] = useState([]);
@@ -54,23 +55,22 @@ function CourseDetailPage() {
     progress.some(p => p.lectureId === lecture._id && p.viewed)
   );
 
- const handleGenerateCertificate = () => {
-  if (!allLecturesCompleted) {
-    alert("Please complete all lectures first.");
-    return;
-  }
+  const handleGenerateCertificate = () => {
+    if (!allLecturesCompleted) {
+      alert("Please complete all lectures first.");
+      return;
+    }
 
-  // ✅ Navigate with all required certificate data
-  navigate(`/certificate/${courseId}`, {
-    state: {
-      userId: user.id,
-      username: user.username,
-      courseId,
-      courseName: courseDetails.title,
-    },
-  });
-};
-
+    // ✅ Navigate with all required certificate data
+    navigate(`/certificate/${courseId}`, {
+      state: {
+        userId: user.id,
+        username: user.username,
+        courseId,
+        courseName: courseDetails.title,
+      },
+    });
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -148,9 +148,7 @@ function CourseDetailPage() {
           )}
 
           {activeTab === "Review" && (
-            <div className="text-gray-600 text-sm">
-              Student reviews will be displayed here.
-            </div>
+            <Review courseId={courseId} />
           )}
         </div>
       </div>
