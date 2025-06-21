@@ -1,0 +1,29 @@
+// const express = require("express");
+// const instructorInstructorController = require("../../controller/instructorController/coursesController")
+
+// const router = express.Router();
+
+// router.post("/add", instructorInstructorController.addNewCourse);
+// router.get("/get", instructorInstructorController.getAllCourses);
+// router.get("/get/details/:id", instructorInstructorController.getCourseDetailsByID);
+// router.put("/update/:id", instructorInstructorController.updateCourseByID);
+
+// module.exports = router;
+
+
+const express = require("express");
+const instructorInstructorController = require("../../controller/instructorController/coursesController");
+const { authenticateToken,authorizeRole } = require("../../Security/Auth");  // Adjust path as needed
+
+const router = express.Router();
+
+router.post("/add", authenticateToken, instructorInstructorController.addNewCourse);
+router.get("/get", authenticateToken, instructorInstructorController.getAllCourses);
+router.get("/get/details/:id", instructorInstructorController.getCourseDetailsByID);
+router.put("/update/:id", authenticateToken, instructorInstructorController.updateCourseByID);
+
+// New route to get courses of the logged-in instructor
+router.get("/mycourse", authenticateToken, instructorInstructorController.getInstructorCourses);
+router.delete("/delete/:id", instructorInstructorController.deleteCourseByID);
+
+module.exports = router;
