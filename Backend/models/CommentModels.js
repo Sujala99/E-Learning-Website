@@ -1,31 +1,35 @@
-// const mongoose = require("mongoose");
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-// const CommentSchema = new Schema(
-//   {
-//     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-//     desc: { type: String, required: true },
-//     post: { type: Schema.Types.ObjectId, ref: "Post", required: true },
-//     check: { type: Boolean, default: false },
-//     parent: {
-//       type: Schema.Types.ObjectId,
-//       ref: "Comment",
-//       default: null,
-//     },
-//     replyOnUser: {
-//       type: Schema.Types.ObjectId,
-//       ref: "User",
-//       default: null,
-//     },
-//   },
-//   { timestamps: true, toJSON: { virtuals: true } }
-// );
+const CommentSchema = new Schema(
+  {
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    desc: { type: String, required: true },
 
-// CommentSchema.virtual("replies", {
-//   ref: "Comment",
-//   localField: "_id",
-//   foreignField: "parent",
-// });
+    // Changed from "post" to "course"
+    course: { type: Schema.Types.ObjectId, ref: "Course", required: true },
 
+    check: { type: Boolean, default: false },
 
+    parent: {
+      type: Schema.Types.ObjectId,
+      ref: "Comment",
+      default: null,
+    },
+    replyOnUser: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+  },
+  { timestamps: true, toJSON: { virtuals: true } }
+);
 
-// module.exports = mongoose.model("Comment", CommentSchema);
+// For nested replies
+CommentSchema.virtual("replies", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "parent",
+});
+
+module.exports = mongoose.model("Comment", CommentSchema);

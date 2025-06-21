@@ -1,27 +1,25 @@
-const Course = require ("../models/CommentModels");
+const Comment = require("../models/CommentModels");
 const Course = require("../models/coursesModels");
 
 exports.createComment = async (req, res, next) => {
   try {
-    const { desc, slug, parent, replyOnUser } = req.body;
+    const { desc, courseId, parent, replyOnUser } = req.body;
 
-    const post = await Post.findOne({ slug: slug });
-
-    if (!post) {
-      const error = new Error("Post was not found");
-      return next(error);
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
     }
 
     const newComment = new Comment({
-      user: req.user._id,
+      user: req.user.id,
       desc,
-      post: post._id,
-      parent,
-      replyOnUser,
+      course: course._id,
+      parent: parent || null,
+      replyOnUser: replyOnUser || null,
     });
 
     const savedComment = await newComment.save();
-    return res.json(savedComment);
+    return res.status(201).json(savedComment);
   } catch (error) {
     next(error);
   }
@@ -32,13 +30,11 @@ exports.updateComment = async (req, res, next) => {
     const { desc, check } = req.body;
 
     const comment = await Comment.findById(req.params.commentId);
-
     if (!comment) {
-      const error = new Error("Comment was not found");
-      return next(error);
+      return res.status(404).json({ message: "Comment not found" });
     }
 
-    comment.desc = desc || comment.desc;
+    comment.desc = desc ?? comment.desc;
     comment.check = typeof check !== "undefined" ? check : comment.check;
 
     const updatedComment = await comment.save();
@@ -51,16 +47,13 @@ exports.updateComment = async (req, res, next) => {
 exports.deleteComment = async (req, res, next) => {
   try {
     const comment = await Comment.findByIdAndDelete(req.params.commentId);
-    await Comment.deleteMany({ parent: comment._id });
-
     if (!comment) {
-      const error = new Error("Comment was not found");
-      return next(error);
+      return res.status(404).json({ message: "Comment not found" });
     }
 
-    return res.json({
-      message: "Comment is deleted successfully",
-    });
+    await Comment.deleteMany({ parent: comment._id });
+
+    return res.json({ message: "Comment deleted successfully" });
   } catch (error) {
     next(error);
   }
@@ -69,23 +62,30 @@ exports.deleteComment = async (req, res, next) => {
 exports.getAllComments = async (req, res, next) => {
   try {
     const filter = req.query.searchKeyword;
-    let where = {};
+    const courseId = req.query.courseId;
+
+    const where = {};
     if (filter) {
       where.desc = { $regex: filter, $options: "i" };
     }
+    if (courseId) {
+      where.course = courseId;
+    }
+
     let query = Comment.find(where);
+
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * pageSize;
-    const total = await Comment.find(where).countDocuments();
+    const total = await Comment.countDocuments(where);
     const pages = Math.ceil(total / pageSize);
 
     res.header({
-      "x-filter": filter,
-      "x-totalcount": JSON.stringify(total),
-      "x-currentpage": JSON.stringify(page),
-      "x-pagesize": JSON.stringify(pageSize),
-      "x-totalpagecount": JSON.stringify(pages),
+      "x-filter": filter || "",
+      "x-totalcount": total,
+      "x-currentpage": page,
+      "x-pagesize": pageSize,
+      "x-totalpagecount": pages,
     });
 
     if (page > pages) {
@@ -102,20 +102,18 @@ exports.getAllComments = async (req, res, next) => {
         },
         {
           path: "parent",
-          populate: [
-            {
-              path: "user",
-              select: ["avatar", "name"],
-            },
-          ],
+          populate: {
+            path: "user",
+            select: ["avatar", "name"],
+          },
         },
         {
           path: "replyOnUser",
           select: ["avatar", "name"],
         },
         {
-          path: "post",
-          select: ["slug", "title"],
+          path: "course",
+          select: ["_id", "title"],
         },
       ])
       .sort({ updatedAt: "desc" });
@@ -125,4 +123,3 @@ exports.getAllComments = async (req, res, next) => {
     next(error);
   }
 };
-

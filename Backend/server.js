@@ -37,6 +37,7 @@ const orderRoute = require("./routes/studentRoutes/OrderRoutes");
 const studentcoursesRoute = require("./routes/studentRoutes/StudentCoursesRoutes");
 const courseProgressRoute = require("./routes/studentRoutes/CourseProgressRoute");
 const certificateRoutes = require("./routes/studentRoutes/CertificateRoutes");
+const commentRoutes = require("./routes/CommentRoutes");
 
 
 app.use("/users", userRoutes);
@@ -48,6 +49,7 @@ app.use("/order",orderRoute );
 app.use("/studentCourses",studentcoursesRoute );
 app.use("/course/progress",courseProgressRoute );
 app.use("/certificate", certificateRoutes);
+app.use("/comment", commentRoutes);
 
 
 // Start the server
