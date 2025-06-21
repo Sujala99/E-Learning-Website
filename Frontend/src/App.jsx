@@ -17,6 +17,7 @@ import CheckoutPage from './pages/Students/Checkout';
 import MyLearningPage from './pages/Students/LearningPage';
 import Video from './pages/Students/Video';
 import CourseDetailPage from './pages/Students/CoursePageDetail';
+import CertificatePage from './pages/Students/Certificate';
 
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
         <Route path="/mylearning" element={< MyLearningPage/>} />
         <Route path="/video" element={< Video/>} />
         <Route path="/course/:courseId" element={< CourseDetailPage/>} />
+        <Route path="/certificate/:courseId" element={<CertificatePage />} />
 
         {/* <Route path="*" element={<div>404 - Page Not Found</div>} /> */}
       </Routes>
