@@ -138,8 +138,79 @@ exports.uploadImage = async (req, res) => {
 };
 
 
+exports.getProfile = async (req, res) => {
+    try {
+        const userId = req.user.id; // Assuming the user ID is in the token payload
+
+        // Find the user by their ID
+        const user = await User.findById(userId).select("-password"); // Exclude password from the profile
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        // Return the user's profile details
+        return res.status(200).json({
+            username: user.username,
+            email: user.email,
+            fullname: user.fullname,
+            dob: user.dob,
+            gender: user.gender,
+            image: user.image,
+            role: user.role,
+        });
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        return res.status(500).json({ message: "Server error while fetching profile." });
+    }
+};
 
 
+exports.updateProfile = async (req, res) => {
+    try {
+        const userId = req.user.id; // Assuming the user ID is in the token payload
+
+        // Find the user by their ID
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        // Update the user's profile
+        const updatedUserData = {
+            username: req.body.username || user.username,
+            email: req.body.email || user.email,
+            fullname: req.body.fullname || user.fullname,
+            dob: req.body.dob || user.dob,
+            gender: req.body.gender || user.gender,
+            image: req.body.image || user.image,
+            role: req.body.role || user.role,
+        };
+
+        // If a new password is provided, hash it before updating
+        if (req.body.password) {
+            const hashedPassword = await bcrypt.hash(req.body.password, 10);
+            updatedUserData.password = hashedPassword;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userId, updatedUserData, { new: true }).select("-password");
+
+        // Return the updated profile
+        return res.status(200).json({
+            username: updatedUser.username,
+            email: updatedUser.email,
+            fullname: updatedUser.fullname,
+            dob: updatedUser.dob,
+            gender: updatedUser.gender,
+            image: updatedUser.image,
+            role: updatedUser.role,
+        });
+    } catch (error) {
+        console.error("Error updating user profile:", error);
+        return res.status(500).json({ message: "Server error while updating profile." });
+    }
+};
 
 
 
