@@ -25,10 +25,10 @@ router.post('/uploadImage', authenticateToken, upload.single('profilePicture'), 
 
 // router.post("/addUser", authenticateToken,userController.addUser);
 
-// router.get("/profile", authenticateToken, userController.getProfile); 
+router.get("/profile", authenticateToken, userController.getProfile); 
 
 
-// router.put("/updateProfile",authenticateToken, userController.updateProfile);
+router.put("/updateProfile",authenticateToken, userController.updateProfile);
 
 
 

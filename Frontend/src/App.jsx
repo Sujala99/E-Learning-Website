@@ -18,6 +18,8 @@ import MyLearningPage from './pages/Students/LearningPage';
 import Video from './pages/Students/Video';
 import CourseDetailPage from './pages/Students/CoursePageDetail';
 import CertificatePage from './pages/Students/Certificate';
+import ProfilePage from './pages/Profile';
+import ProfileEdit from './pages/Students/EditProfile';
 
 
 function App() {
@@ -51,6 +53,8 @@ function App() {
 
 
         <Route path="/comment" element={<Comment />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/edit-profile" element={<ProfileEdit />} />
 
         {/* <Route path="*" element={<div>404 - Page Not Found</div>} /> */}
       </Routes>
