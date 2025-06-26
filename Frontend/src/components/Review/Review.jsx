@@ -12,12 +12,9 @@ const Review = ({ courseId }) => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/comment/getallcomment", {
+        const res = await axios.get(`http://localhost:4000/comment/course/${courseId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
-          },
-          params: {
-            courseId: courseId,
           },
         });
 
@@ -63,6 +60,16 @@ const Review = ({ courseId }) => {
     }
   };
 
+  const handleDeleteComment = (commentId) => {
+    setComments(comments.filter((c) => c._id !== commentId));
+  };
+
+  const handleEditComment = (updatedComment) => {
+    setComments(
+      comments.map((c) => (c._id === updatedComment._id ? updatedComment : c))
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -81,9 +88,19 @@ const Review = ({ courseId }) => {
         </button>
       </div>
 
-      {comments.map((comment) => (
-        <Comment key={comment._id} comment={comment} onReply={() => {}} />
-      ))}
+      {comments.length > 0 ? (
+        comments.map((comment) => (
+          <Comment
+            key={comment._id}
+            comment={comment}
+            currentUserId={user?._id}
+            onDelete={handleDeleteComment}
+            onEdit={handleEditComment}
+          />
+        ))
+      ) : (
+        <p className="text-gray-500">No comments yet.</p>
+      )}
     </div>
   );
 };

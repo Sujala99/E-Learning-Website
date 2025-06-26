@@ -90,6 +90,8 @@ exports.getStudentViewCourseDetails = async (req, res) => {
   }
 };
 
+
+
 exports.checkCoursePurchaseInfo = async (req, res) => {
   try {
     const { id, studentId } = req.params;

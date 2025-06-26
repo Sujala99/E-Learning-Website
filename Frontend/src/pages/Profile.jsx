@@ -47,9 +47,8 @@ const ProfilePage = () => {
     <div className="bg-gray-100 min-h-screen flex items-center justify-center">
       <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
         <div className="flex flex-col items-center mb-6">
-          <img src={user.image && user.image !== ""
-                    ? user.image
-                    : "/default-placeholder.jpg"} alt={user.image} className="w-32 h-32 rounded-full mb-4" />
+          <img src={user?.image && user.image !== ""
+                    ? user.image : "/default-placeholder.jpg"} alt={user.username} className="w-32 h-32 rounded-full mb-4" />
           <h3 className="text-xl font-semibold">{user?.username }</h3>
           <p className="text-sm text-gray-600">{user?.email }</p>
         </div>
@@ -62,11 +61,7 @@ const ProfilePage = () => {
           <li><a href="#" className="hover:underline">Certificate</a></li>
           <li><a href="#" className="hover:underline">Report and Compliane</a></li>
           <li><a href="#" className="hover:underline">Help and Support</a></li>
-          <li>
-            <a href="#" className="hover:underline" onClick={() => unsetUser()}>
-              Log Out
-            </a>
-          </li>
+          <li><a href="/logout" className="hover:underline">Log Out</a> </li>
         </ul>
       </div>
     </div>

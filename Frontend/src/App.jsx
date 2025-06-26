@@ -20,6 +20,9 @@ import CourseDetailPage from './pages/Students/CoursePageDetail';
 import CertificatePage from './pages/Students/Certificate';
 import ProfilePage from './pages/Profile';
 import ProfileEdit from './pages/Students/EditProfile';
+import Logout from './pages/Logout';
+import Review from './components/Review/Comment';
+import Comment from './components/Review/Comment';
 
 
 function App() {
@@ -57,6 +60,8 @@ function App() {
         <Route path="/edit-profile" element={<ProfileEdit />} />
 
         {/* <Route path="*" element={<div>404 - Page Not Found</div>} /> */}
+        <Route path="/logout" element={<Logout />} />
+
       </Routes>
     </Router>
 
