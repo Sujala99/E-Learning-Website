@@ -27,16 +27,17 @@ exports.createComment = async (req, res, next) => {
 
 exports.updateComment = async (req, res, next) => {
   try {
-    const { desc, check } = req.body;
-
+    const { desc } = req.body;
     const comment = await Comment.findById(req.params.commentId);
-    if (!comment) {
-      return res.status(404).json({ message: "Comment not found" });
+
+    if (!comment) return res.status(404).json({ message: "Comment not found" });
+
+    // 🔐 Check if current user is the author
+    if (comment.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized to edit this comment" });
     }
 
     comment.desc = desc ?? comment.desc;
-    comment.check = typeof check !== "undefined" ? check : comment.check;
-
     const updatedComment = await comment.save();
     return res.json(updatedComment);
   } catch (error) {
@@ -44,20 +45,26 @@ exports.updateComment = async (req, res, next) => {
   }
 };
 
+
 exports.deleteComment = async (req, res, next) => {
   try {
-    const comment = await Comment.findByIdAndDelete(req.params.commentId);
-    if (!comment) {
-      return res.status(404).json({ message: "Comment not found" });
+    const comment = await Comment.findById(req.params.commentId);
+    if (!comment) return res.status(404).json({ message: "Comment not found" });
+
+    // 🔐 Check if current user is the author
+    if (comment.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized to delete this comment" });
     }
 
-    await Comment.deleteMany({ parent: comment._id });
+    await comment.deleteOne(); // deletes current comment
+    await Comment.deleteMany({ parent: comment._id }); // delete its replies too
 
     return res.json({ message: "Comment deleted successfully" });
   } catch (error) {
     next(error);
   }
 };
+
 
 exports.getAllComments = async (req, res, next) => {
   try {
@@ -98,7 +105,7 @@ exports.getAllComments = async (req, res, next) => {
       .populate([
         {
           path: "user",
-          select: ["avatar", "name", "verified"],
+         select: ["username", "avatar"]
         },
         {
           path: "parent",
@@ -119,6 +126,41 @@ exports.getAllComments = async (req, res, next) => {
       .sort({ updatedAt: "desc" });
 
     return res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+exports.getCommentsByCourseId = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+
+    const comments = await Comment.find({ course: courseId, parent: null }) // Top-level comments only
+      .populate([
+  {
+    path: "user",
+    select: ["username", "avatar"],  
+  },
+  {
+    path: "replies",
+    populate: [
+      {
+        path: "user",
+        select: ["username", "avatar"], 
+      },
+      {
+        path: "replyOnUser",
+        select: ["username", "avatar"],  
+      },
+    ],
+  },
+])
+
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json(comments);
   } catch (error) {
     next(error);
   }

@@ -15,4 +15,7 @@ router.delete("/:commentId", authenticateToken, commentController.deleteComment)
 // Get all comments (optionally filtered by courseId)
 router.get("/getallcomment", commentController.getAllComments);
 
+// Get comments by course ID
+router.get("/course/:courseId", commentController.getCommentsByCourseId);
+
 module.exports = router;
