@@ -1,6 +1,10 @@
 import './App.css'
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
+
+
 import Home from './pages/Home';
 import Register from './pages/register';
 
@@ -23,6 +27,10 @@ import ProfileEdit from './pages/Students/EditProfile';
 import Logout from './pages/Logout';
 import Review from './components/Review/Comment';
 import Comment from './components/Review/Comment';
+import EditCourse from './pages/Instructor/EditCourse';
+import AboutUs from './pages/AboutUs';
+import AllCertificate from './pages/Students/AllCertificate';
+import CertificateViewPage from './pages/Students/CertificateViewPage'; // ✅ CORRECT
 
 
 function App() {
@@ -41,6 +49,7 @@ function App() {
         <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
         <Route path="/instructor/courses/addcourse" element={<AddCourse />} />
         <Route path="/instructor/courses/mycourses" element={< GetMyCourses/>} />
+        <Route path="/instructor/courses/edit-course/:courseId" element={< EditCourse/>} />
 
 
 
@@ -58,9 +67,13 @@ function App() {
         <Route path="/comment" element={<Comment />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/edit-profile" element={<ProfileEdit />} />
+        <Route path="/aboutus" element={<AboutUs />} />
+        <Route path="/all-certificate" element={<AllCertificate />} />
+        <Route path="/all-certificate/view/:certificateId" element={<CertificateViewPage />} />
 
         {/* <Route path="*" element={<div>404 - Page Not Found</div>} /> */}
         <Route path="/logout" element={<Logout />} />
+        {/* <Route path="/logout" element={<Logout />} /> */}
 
       </Routes>
     </Router>

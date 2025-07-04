@@ -17,13 +17,12 @@ const { authenticateToken,authorizeRole } = require("../../Security/Auth");  // 
 
 const router = express.Router();
 
-router.post("/add", authenticateToken, instructorInstructorController.addNewCourse);
+router.post("/add", authenticateToken, instructorInstructorController.addCourse);
 router.get("/get", authenticateToken, instructorInstructorController.getAllCourses);
-router.get("/get/details/:id", instructorInstructorController.getCourseDetailsByID);
+router.get("/get/details/:id", instructorInstructorController.getCourseDetailsByID); //get details of course
 router.put("/update/:id", authenticateToken, instructorInstructorController.updateCourseByID);
 
-// New route to get courses of the logged-in instructor
-router.get("/mycourse", authenticateToken, instructorInstructorController.getInstructorCourses);
-router.delete("/delete/:id", instructorInstructorController.deleteCourseByID);
+router.get("/mycourse", authenticateToken, instructorInstructorController.getInstructorCourses); //get course of instructor by instructor id
+router.delete("/delete/:id", authenticateToken, instructorInstructorController.deleteCourseByID);
 
 module.exports = router;

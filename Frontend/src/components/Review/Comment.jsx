@@ -1,10 +1,17 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const Comment = ({ comment, currentUserId, onEdit, onDelete, level = 0, refresh }) => {
+const Comment = ({
+  comment,
+  currentUserId,
+  onEdit,
+  onDelete,
+  level = 0,
+  refresh,
+}) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState("");
-  const [showMenu, setShowMenu] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
   const token = localStorage.getItem("token");
 
   const canModify = [comment.user?._id, comment.user?.id].includes(currentUserId);
@@ -31,89 +38,106 @@ const Comment = ({ comment, currentUserId, onEdit, onDelete, level = 0, refresh 
 
       setReplyText("");
       setIsReplying(false);
-      refresh(); // Refresh comments
+      refresh();
     } catch (err) {
       console.error("Error posting reply:", err);
     }
   };
 
   return (
-    <div className={`ml-${level * 5} py-3 border-b`}>
-      <div className="flex justify-between items-start">
-        <div className="w-full">
-          <p className="font-semibold text-gray-800">{comment.user?.name || comment.user?.username}</p>
-          
-          {/* If it's a reply, show replied-to user */}
-          {comment.replyOnUser && (
-            <p className="text-sm text-blue-600 font-medium mb-1">
-              Replying to @{comment.replyOnUser?.name || comment.replyOnUser?.username}
-            </p>
+    <div className="flex gap-3 py-4">
+      {/* Avatar */}
+      <div className="flex-shrink-0">
+        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-white font-bold uppercase">
+          {comment.user?.name?.charAt(0)}
+        </div>
+      </div>
+
+      {/* Comment Content */}
+      <div className="flex-1">
+        {/* Username and Date */}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-sm text-gray-900">
+              {comment.user?.username || comment.user?.name}
+            </span>
+            <span className="text-xs text-gray-500">
+              {new Date(comment.createdAt).toLocaleDateString()}
+            </span>
+          </div>
+
+          {/* Edit/Delete Controls */}
+          {canModify && (
+            <div className="text-sm text-gray-400 space-x-2">
+              <button
+                onClick={() => onEdit(comment)}
+                className="hover:text-blue-600"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => onDelete(comment._id)}
+                className="hover:text-red-500"
+              >
+                Delete
+              </button>
+            </div>
           )}
-          
-          <p className="text-gray-700">{comment.desc}</p>
         </div>
 
-        {canModify && (
-          <div className="relative">
-            <button onClick={() => setShowMenu(!showMenu)}>⋯</button>
-            {showMenu && (
-              <div className="absolute right-0 bg-white shadow rounded border p-2 z-10">
-                <button
-                  className="block w-full text-left text-sm text-blue-500"
-                  onClick={() => onEdit(comment)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="block w-full text-left text-sm text-red-500"
-                  onClick={() => onDelete(comment._id)}
-                >
-                  Delete
-                </button>
-              </div>
-            )}
+        {/* Comment Text */}
+        <p className="text-sm mt-1 text-gray-800">{comment.desc}</p>
+
+        {/* Reply + View Replies */}
+        <div className="mt-2 flex items-center gap-4 text-sm text-blue-500">
+          <button onClick={() => setIsReplying(!isReplying)}>Reply</button>
+          {comment.replies?.length > 0 && (
+            <button onClick={() => setShowReplies(!showReplies)}>
+              {showReplies
+                ? "Hide replies"
+                : `View ${comment.replies.length} repl${
+                    comment.replies.length === 1 ? "y" : "ies"
+                  }`}
+            </button>
+          )}
+        </div>
+
+        {/* Reply Input */}
+        {isReplying && (
+          <div className="mt-2">
+            <input
+              type="text"
+              className="w-full border border-gray-300 p-2 rounded text-sm"
+              placeholder={`Reply to ${comment.user?.name}`}
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+            />
+            <button
+              onClick={handleReplySubmit}
+              className="mt-1 bg-blue-500 text-white text-sm px-3 py-1 rounded"
+            >
+              Post
+            </button>
+          </div>
+        )}
+
+        {/* Nested Replies */}
+        {showReplies && comment.replies?.length > 0 && (
+          <div className="mt-3 ml-6 border-l border-gray-300 pl-4">
+            {comment.replies.map((reply) => (
+              <Comment
+                key={reply._id}
+                comment={reply}
+                currentUserId={currentUserId}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                level={level + 1}
+                refresh={refresh}
+              />
+            ))}
           </div>
         )}
       </div>
-
-      <button
-        onClick={() => setIsReplying(!isReplying)}
-        className="text-sm text-blue-500 mt-1"
-      >
-        Reply
-      </button>
-
-      {isReplying && (
-        <div className="mt-2">
-          <input
-            type="text"
-            className="w-full border p-2 rounded"
-            placeholder={`Reply to ${comment.user?.name || comment.user?.username}`}
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-          />
-          <button
-            onClick={handleReplySubmit}
-            className="bg-blue-500 text-white px-3 py-1 rounded mt-1"
-          >
-            Post Reply
-          </button>
-        </div>
-      )}
-
-      {/* Recursive replies */}
-      {comment.replies?.length > 0 &&
-        comment.replies.map((reply) => (
-          <Comment
-            key={reply._id}
-            comment={reply}
-            currentUserId={currentUserId}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            level={level + 1}
-            refresh={refresh}
-          />
-        ))}
     </div>
   );
 };

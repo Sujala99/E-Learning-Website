@@ -3,13 +3,9 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
-        required: true,
-        unique: true
-
+        unique: true,
     },
-    phonenumber: {
-        type: String,
-    },
+    phonenumber: String,
     email: {
         type: String,
         required: true,
@@ -17,28 +13,29 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: function () {
+            return !this.googleId;
+        }
     },
-    fullname: {
+    googleId: {
         type: String,
+        default: null
     },
-    dob: {
-        type: Date
-    },
+    fullname: String,
+    dob: Date,
     gender: {
         type: String,
         enum: ["male", "female", "other"]
     },
     image: {
         type: String,
-        default: null,
-  },
+        default: null
+    },
     role: {
         type: String,
         enum: ["user", "instructor", "admin"],
         default: "user"
     },
-    
 });
 
 module.exports = mongoose.model("User", userSchema);

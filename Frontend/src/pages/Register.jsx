@@ -4,12 +4,12 @@ import loginImage from "../assets/images/login.png";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Register = () => {
   const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
-  // State for form fields
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,15 +24,10 @@ const Register = () => {
     setShowPassword((prev) => !prev);
   };
 
-  // Handle form submission
   const registerUser = async (e) => {
     e.preventDefault();
 
-    const userData = {
-      username,
-      email,
-      password,
-    };
+    const userData = { username, email, password };
 
     try {
       const response = await fetch("http://localhost:4000/users/register", {
@@ -43,9 +38,7 @@ const Register = () => {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed.");
-      }
+      if (!response.ok) throw new Error(data.message || "Registration failed.");
 
       setUser({ id: data.userId, isAdmin: false });
 
@@ -65,34 +58,53 @@ const Register = () => {
     }
   };
 
+  const handleGoogleLogin = async (credentialResponse) => {
+    try {
+      const res = await fetch("http://localhost:4000/users/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Google login failed");
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
+
+      Swal.fire({
+        title: "Login Successful",
+        text: "Welcome back!",
+        icon: "success",
+      });
+
+      if (data.user.role === "admin") {
+        navigate("/admin");
+      } else if (data.user.role === "instructor") {
+        navigate("/instructor/dashboard");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      Swal.fire({ title: "Google Login Error", text: error.message, icon: "error" });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#DADDE7] font-sans">
-      <div className="w-full">
-        <Navbar />
-      </div>
+      <Navbar />
 
       <div className="grid grid-cols-1 md:grid-cols-2 min-h-[calc(100vh-80px)] px-4 md:px-16 py-8 gap-8">
-        {/* Left Side - Image */}
-        <div className="order-1 md:order-1 flex items-center justify-center bg-[#e4eaf7] p-6 rounded">
+        <div className="order-1 flex items-center justify-center bg-[#e4eaf7] p-6 rounded">
           <div className="text-center max-w-md">
-            <img
-              src={loginImage}
-              alt="Login Visual"
-              className="mx-auto max-h-[300px] mb-6"
-            />
-            <p className="text-md text-gray-700 font-medium">
-              Join us and explore new opportunities!
-            </p>
+            <img src={loginImage} alt="Login Visual" className="mx-auto max-h-[300px] mb-6" />
+            <p className="text-md text-gray-700 font-medium">Join us and explore new opportunities!</p>
           </div>
         </div>
 
-        {/* Right Side - Form */}
-        <div className="order-2 md:order-2 flex items-center justify-center bg-white p-6 rounded shadow">
-          <form
-            onSubmit={registerUser}
-            className="w-full max-w-sm space-y-4"
-            autoComplete="off"
-          >
+        <div className="order-2 flex items-center justify-center bg-white p-6 rounded shadow">
+          <form onSubmit={registerUser} className="w-full max-w-sm space-y-4" autoComplete="off">
             <h2 className="text-3xl font-semibold text-gray-800">Register</h2>
             <p className="text-sm text-gray-500">Enter your details below</p>
 
@@ -139,17 +151,18 @@ const Register = () => {
               Register
             </button>
 
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-2 border border-gray-300 py-2 rounded hover:bg-gray-100 transition duration-200"
-            >
-              <img
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                alt="Google icon"
-                className="w-5 h-5"
+            <div className="flex items-center justify-center my-4">
+              <hr className="w-1/3 border-gray-300" />
+              <span className="mx-2 text-gray-500 text-sm">or</span>
+              <hr className="w-1/3 border-gray-300" />
+            </div>
+
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleLogin}
+                onError={() => Swal.fire({ title: "Google Login Failed", icon: "error" })}
               />
-              <span className="text-gray-700">Login with Google</span>
-            </button>
+            </div>
 
             <div className="mt-6 text-sm text-gray-700 text-center">
               Already have an account?{" "}

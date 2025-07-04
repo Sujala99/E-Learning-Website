@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useUserContext } from "../../context/UserContext";
 import { useNavigate, Link } from "react-router-dom";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 
 function LearningPage() {
   const { user } = useUserContext();
@@ -40,7 +42,9 @@ function LearningPage() {
   if (courses.length === 0) return <p>No purchased courses found.</p>;
 
   return (
-    <div className="p-6">
+    <div>
+      <Navbar/>
+      <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">My Learning</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {courses.map((course) => (
@@ -72,7 +76,10 @@ function LearningPage() {
         ))}
       </div>
     </div>
-  );
+    <Footer/>
+
+    </div>
+      );
 }
 
 export default LearningPage;

@@ -56,10 +56,30 @@ exports.removeFromCart = async (req, res) => {
 
     res.status(200).json({ message: "Course removed from cart", cart });
   } catch (err) {
+    console.error("Failed to remove course from cart:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
+
+
+
+// Clear the entire cart
+exports.clearCart = async (req, res) => {
+  const { studentId } = req.body;
+
+  try {
+    const cart = await Cart.findOne({ student: studentId });
+    if (!cart) return res.status(404).json({ message: "Cart not found" });
+
+    cart.courses = [];
+    await cart.save();
+
+    res.status(200).json({ message: "Cart cleared", cart });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 // controllers/cartController.js

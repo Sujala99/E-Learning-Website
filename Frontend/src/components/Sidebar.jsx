@@ -1,36 +1,81 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
+  const linkClass =
+    'block w-full py-2 px-4 rounded transition-colors duration-200';
+  const activeClass = 'bg-blue-100 text-blue-700 font-semibold';
+  const inactiveClass = 'text-blue-500 hover:bg-gray-100 hover:text-blue-700';
+
   return (
-    <aside className="w-64 bg-white shadow-md p-4">
-      <div className="flex items-center justify-center mb-4">
-        <img
-          className="h-12 w-auto"
-          src="path-to-your-logo.png" // Replace with your logo path
-          alt="ADACEMIX"
-        />
+    <aside className="w-64 h-full bg-white shadow-md p-4">
+      <div className="text-center mb-6">
       </div>
-      <ul>
-        <li className="mb-2">
-          <Link to="/instructor/courses/mycourses" className="block w-full py-2 px-4 rounded hover:bg-gray-200 text-blue-500 hover:text-blue-700"> Courses</Link>
-        </li>
-        <li className="mb-2">
-          <Link to="/instructor/courses/addcourse" className="block w-full py-2 px-4 rounded hover:bg-gray-200 text-blue-500 hover:text-blue-700">Add Courses</Link>
-        </li>
-        <li className="mb-2">
-          <a href="#" className="block w-full py-2 px-4 rounded hover:bg-gray-200 text-blue-500 hover:text-blue-700">Performances</a>
-        </li>
-        <li className="mb-2">
-          <a href="#" className="block w-full py-2 px-4 rounded hover:bg-gray-200 text-blue-500 hover:text-blue-700">Notification</a>
-        </li>
-        <li className="mb-2">
-          <a href="#" className="block w-full py-2 px-4 rounded hover:bg-gray-200 text-blue-500 hover:text-blue-700">Profile</a>
-        </li>
-        <li className="mb-2">
-          <a href="#" className="block w-full py-2 px-4 rounded hover:bg-gray-200 text-blue-500 hover:text-blue-700">Log out</a>
-        </li>
-      </ul>
+
+      <nav>
+        <ul className="space-y-2">
+          <li>
+            <NavLink
+              to="/instructor/dashboard"
+              className={({ isActive }) =>
+                `${linkClass} ${isActive ? activeClass : inactiveClass}`
+              }
+            >
+              My Courses
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/instructor/courses/addcourse"
+              className={({ isActive }) =>
+                `${linkClass} ${isActive ? activeClass : inactiveClass}`
+              }
+            >
+              Add Course
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/instructor/performance"
+              className={({ isActive }) =>
+                `${linkClass} ${isActive ? activeClass : inactiveClass}`
+              }
+            >
+              Performance
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/instructor/notifications"
+              className={({ isActive }) =>
+                `${linkClass} ${isActive ? activeClass : inactiveClass}`
+              }
+            >
+              Notifications
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                `${linkClass} ${isActive ? activeClass : inactiveClass}`
+              }
+            >
+              Profile
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/logout"
+              className={({ isActive }) =>
+                `${linkClass} ${isActive ? activeClass : inactiveClass}`
+              }
+            >
+              Log Out
+            </NavLink>
+          </li>
+        </ul>
+      </nav>
     </aside>
   );
 };

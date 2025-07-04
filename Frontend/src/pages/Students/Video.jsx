@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ReactPlayer from 'react-player';
+import Navbar from '../../components/Navbar';
 
 // Define the data for the chapters
 const chapters = [
@@ -18,7 +19,9 @@ const Video = () => {
   const [activeTab, setActiveTab] = useState('courses');
 
   return (
-    <div className="p-4">
+    <div>
+      <Navbar/>
+      <div className="p-4">
       <div className="relative">
         <ReactPlayer
           url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
@@ -73,6 +76,8 @@ const Video = () => {
         {activeTab === 'questions' && <p>Questions content goes here.</p>}
         {activeTab === 'review' && <p>Review content goes here.</p>}
       </div>
+    </div>
+    <Footer/>
     </div>
   );
 };

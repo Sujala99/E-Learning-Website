@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useUserContext } from "../../context/UserContext";
 import { useNavigate } from 'react-router-dom';
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 
 
 const CartPage = () => {
@@ -31,18 +33,18 @@ const CartPage = () => {
   };
 
 const handleRemove = async (courseId) => {
-  console.log("Removing course with ID:", courseId, "for user:", user);
   try {
-    const res = await axios.post("http://localhost:4000/cart/remove", {
-      studentId: user._id,
+    await axios.post("http://localhost:4000/cart/remove", {
+      studentId: user._id,  // Make sure user._id exists
       courseId,
     });
-    console.log("Remove response:", res.data);
     setCartItems((prev) => prev.filter((item) => item._id !== courseId));
   } catch (error) {
     console.error("Failed to remove course from cart:", error);
   }
 };
+
+
 
 const handleCheckout = () => {
   localStorage.setItem("cart", JSON.stringify(cartItems)); // save cart temporarily
@@ -61,7 +63,9 @@ const handleCheckout = () => {
   const total = cartItems.reduce((acc, item) => acc + (item.pricing || 0), 0);
 
   return (
-    <div className="bg-gray-100 p-6">
+    <div>
+      <Navbar/>
+      <div className="bg-gray-100 p-6">
       <div className="flex flex-col md:flex-row">
         {/* Cart Items */}
         <div className="w-full md:w-1/2">
@@ -138,6 +142,12 @@ const handleCheckout = () => {
         </div>
       </div>
     </div>
+    <div>
+      <Footer/>
+    </div>
+
+    </div>
+    
   );
 };
 

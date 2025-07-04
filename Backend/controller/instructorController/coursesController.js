@@ -16,30 +16,57 @@ exports.uploadMedia = async (req, res) => {
 };
 
 
-exports.addNewCourse = async (req, res) => {
+exports.addCourse = async (req, res) => {
   try {
-    const { id: instructorId, username, role } = req.user;
+    const { id: instructorId, username: instructorName, role } = req.user;
 
     if (role !== "instructor") {
       return res.status(403).json({ message: "Only instructors can add courses." });
     }
 
-    const courseData = {
-      ...req.body,
+    const {
+      title,
+      description,
+      pricing,
+      image,
+      objectives,
+      welcomeMessage,
+      curriculum,
+      date,
+      isPublished,
+      category,
+      level,
+      primaryLanguage,
+      subtitle,
+    } = req.body;
+
+    const newCourse = new Course({
+      title,
+      description,
+      pricing,
+      image,
+      objectives,
+      welcomeMessage,
+      curriculum,
       instructorId,
-      instructorName: username,
-      date: new Date(),
-    };
+      instructorName,
+      date,
+      isPublished,
+      category,
+      level,
+      primaryLanguage,
+      subtitle,
+    });
 
-    const newCourse = new Course(courseData);
-    const saved = await newCourse.save();
+    const savedCourse = await newCourse.save();
 
-    res.status(201).json({ success: true, message: "Course created", data: saved });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Error creating course" });
+    res.status(201).json(savedCourse);
+  } catch (error) {
+    console.error("Error creating course:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 
 exports.getAllCourses = async (req, res) => {
@@ -144,3 +171,5 @@ exports.deleteCourseByID = async (req, res) => {
     res.status(500).json({ message: "Delete failed." });
   }
 };
+
+

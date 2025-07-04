@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 
 function ProfileEdit() {
   const [profile, setProfile] = useState({
@@ -43,38 +45,42 @@ function ProfileEdit() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
 
-    const formData = new FormData();
-    for (const key in profile) {
-      if (key !== 'image') {
-        formData.append(key, profile[key]);
-      }
-    }
-    if (profile.image) {
-      formData.append('image', profile.image);
-    }
+  const formData = new FormData();
+  formData.append("fullname", profile.fullName);
+  if (profile.password) formData.append("password", profile.password);
+  if (profile.image instanceof File) {
+    formData.append("image", profile.image);
+  }
 
-    try {
-      const token = localStorage.getItem('token'); // Get the token from localStorage
-      const response = await axios.put('http://localhost:4000/users/updateProfile', formData, {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.put(
+      "http://localhost:4000/users/updateProfile",
+      formData,
+      {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`, // Include the token in the headers
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
-      });
-      console.log('Profile updated:', response.data);
-      // Optionally, navigate back to the profile page or show a success message
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update profile');
-    } finally {
-      setLoading(false);
-    }
-  };
+      }
+    );
+    console.log("Profile updated:", response.data);
+    alert("Profile updated successfully");
+  } catch (err) {
+    setError(err.response?.data?.message || "Failed to update profile");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
+  <div>
+    <Navbar/>
     <div className="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
       {loading && <p>Loading...</p>}
@@ -158,6 +164,8 @@ function ProfileEdit() {
         </div>
       </form>
     </div>
+    <Footer/>
+  </div>
   );
 }
 

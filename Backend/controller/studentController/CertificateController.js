@@ -2,6 +2,7 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
 const Certificate = require("../../models/CertificateModels");
+const Course = require("../../models/coursesModels");
 
 exports.generateCertificate = async (req, res) => {
   const { userId, userName, courseId, courseTitle } = req.body;
@@ -68,5 +69,61 @@ exports.generateCertificate = async (req, res) => {
   } catch (err) {
     console.error("Certificate gen error:", err);
     res.status(500).json({ success: false, message: "Certificate generation failed" });
+  }
+};
+
+
+exports.getUserCertificates = async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) return res.status(400).json({ success: false, message: "Missing userId" });
+
+  try {
+    const certificates = await Certificate.find({ userId });
+
+    // Fetch course titles for each certificate
+    const populatedCertificates = await Promise.all(certificates.map(async (cert) => {
+      const course = await Course.findById(cert.courseId);
+      return {
+        _id: cert._id,
+        courseTitle: course?.title || "Unknown Course",
+        issuedAt: cert.issuedAt,
+        pdfPath: cert.pdfPath,
+      };
+    }));
+
+    res.json({ success: true, data: populatedCertificates });
+  } catch (err) {
+    console.error("Error fetching certificates:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch certificates" });
+  }
+};
+
+
+exports.getCertificateById = async (req, res) => {
+  const { id } = req.params;
+  console.log("Fetching certificate with ID:", id);
+
+  try {
+    const cert = await Certificate.findById(id);
+    if (!cert) {
+      console.warn("Certificate not found for ID:", id);
+      return res.status(404).json({ success: false, message: "Certificate not found" });
+    }
+
+    const course = await Course.findById(cert.courseId);
+    res.json({
+      success: true,
+      data: {
+        _id: cert._id,
+        userId: cert.userId,
+        courseTitle: course?.title || "Unknown Course",
+        issuedAt: cert.issuedAt,
+        pdfPath: cert.pdfPath,
+      },
+    });
+  } catch (err) {
+    console.error("Error fetching certificate:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };

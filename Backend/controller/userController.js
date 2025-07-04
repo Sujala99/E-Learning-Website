@@ -2,7 +2,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const User = require("../models/userModels");
+const Course = require("../models/coursesModels");
 const SECRET_KEY = "8261ba19898d0dcdfe6c0c411df74b587b2f54538f5f451633b71e39f957cf01";
+const { OAuth2Client } = require("google-auth-library");
+
+const client = new OAuth2Client("YOUR_GOOGLE_CLIENT_ID700718330885-0jcg4hkik40jn9a1b7u5joskq68g4tlu.apps.googleusercontent.com");
 
 
 exports.registerUser = async (req, res) => {
@@ -103,6 +107,57 @@ exports.loginUser = async (req, res) => {
 
 
 
+exports.googleLogin = async (req, res) => {
+    const { tokenId } = req.body;
+
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: tokenId,
+            audience: "700718330885-0jcg4hkik40jn9a1b7u5joskq68g4tlu.apps.googleusercontent.com",
+        });
+
+        const { email, name, picture, sub } = ticket.getPayload();
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            // Create a new user
+            user = new User({
+                email,
+                fullname: name,
+                username: email.split("@")[0],
+                googleId: sub,
+                image: picture,
+                role: "user",
+            });
+
+            await user.save();
+        }
+
+        // Generate a JWT token
+        const token = jwt.sign(
+            { id: user._id, role: user.role },
+            SECRET_KEY,
+            { expiresIn: "1d" }
+        );
+
+        res.status(200).json({
+            message: "Google login successful",
+            token,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        console.error("Google login error:", error);
+        res.status(500).json({ message: "Google login failed" });
+    }
+};
+
+
 
 exports.uploadImage = async (req, res) => {
     try {
@@ -167,50 +222,70 @@ exports.getProfile = async (req, res) => {
 
 
 exports.updateProfile = async (req, res) => {
-    try {
-        const userId = req.user.id; // Assuming the user ID is in the token payload
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found." });
 
-        // Find the user by their ID
-        const user = await User.findById(userId);
+    // Collect updated fields
+    const updatedUserData = {
+      fullname: req.body.fullname || user.fullname,
+      dob: req.body.dob || user.dob,
+      gender: req.body.gender || user.gender,
+      role: req.body.role || user.role,
+    };
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found." });
-        }
-
-        // Update the user's profile
-        const updatedUserData = {
-            username: req.body.username || user.username,
-            email: req.body.email || user.email,
-            fullname: req.body.fullname || user.fullname,
-            dob: req.body.dob || user.dob,
-            gender: req.body.gender || user.gender,
-            image: req.body.image || user.image,
-            role: req.body.role || user.role,
-        };
-
-        // If a new password is provided, hash it before updating
-        if (req.body.password) {
-            const hashedPassword = await bcrypt.hash(req.body.password, 10);
-            updatedUserData.password = hashedPassword;
-        }
-
-        const updatedUser = await User.findByIdAndUpdate(userId, updatedUserData, { new: true }).select("-password");
-
-        // Return the updated profile
-        return res.status(200).json({
-            username: updatedUser.username,
-            email: updatedUser.email,
-            fullname: updatedUser.fullname,
-            dob: updatedUser.dob,
-            gender: updatedUser.gender,
-            image: updatedUser.image,
-            role: updatedUser.role,
-        });
-    } catch (error) {
-        console.error("Error updating user profile:", error);
-        return res.status(500).json({ message: "Server error while updating profile." });
+    // Optional: Image update via file
+    if (req.file) {
+      updatedUserData.image = req.file.filename;
     }
+
+    // Optional: Password update
+    if (req.body.password) {
+      updatedUserData.password = await bcrypt.hash(req.body.password, 10);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedUserData, {
+      new: true,
+    }).select("-password");
+
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    return res.status(500).json({ message: "Server error while updating profile." });
+  }
 };
+
+
+exports.getTopCourses = async (req, res) => {
+  try {
+    const courses = await Course.aggregate([{ $sample: { size: 9 } }]);
+    res.json({ success: true, data: courses });
+  } catch (err) {
+    console.error("Error fetching top courses:", err);
+    res.status(500).json({ success: false, message: "Server error while fetching courses" });
+  }
+};
+
+// GET /api/home/instructors
+exports.getInstructors = async (req, res) => {
+  try {
+    const instructors = await User.aggregate([
+      { $match: { role: "instructor" } },
+      { $sample: { size: 6 } },
+      { $project: { _id: 1, username: 1, image: 1 } }
+    ]);
+
+    res.json({ success: true, data: instructors });
+  } catch (err) {
+    console.error("Error fetching instructors:", err);
+    res.status(500).json({ success: false, message: "Server error while fetching instructors" });
+  }
+};
+
+
+
+
 
 
 

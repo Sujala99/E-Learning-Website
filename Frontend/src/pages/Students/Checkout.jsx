@@ -120,6 +120,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useUserContext } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -142,7 +144,7 @@ const handleSimulatedPayment = async () => {
   const userId = user?._id || user?.id;
 
   if (!userId) {
-    alert(" User not loaded yet. Please wait.");
+    alert("User not loaded yet. Please wait.");
     return;
   }
 
@@ -152,6 +154,7 @@ const handleSimulatedPayment = async () => {
   }
 
   try {
+    // 1. Simulate successful order (you already have this)
     const response = await axios.post("http://localhost:4000/order/simulate-payment-success", {
       userId,
       cartItems: cartItems.map((course) => ({
@@ -164,23 +167,30 @@ const handleSimulatedPayment = async () => {
     });
 
     if (response.data.success) {
-      alert("Payment successful!");
+      // 2. Clear cart from backend
+      await axios.post("http://localhost:4000/cart/clear", { studentId: userId });
+
+      // 3. Clear local cart storage and redirect
       localStorage.removeItem("cart");
+      alert("Payment successful!");
       navigate("/mylearning");
     } else {
       alert("Payment failed.");
     }
   } catch (err) {
-    // console.error("Simulated payment failed:", err);
+    console.error("Simulated payment failed:", err);
     alert("Something went wrong while processing your order.");
   }
 };
+
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.pricing, 0);
   const discount = subtotal * 0.15;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-3xl mx-auto">
+   <div>
+    <Navbar/>
+     <div className="bg-white p-6 rounded-lg shadow-md max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Checkout</h1>
 
       <div className="bg-gray-100 p-4 rounded-lg mb-4">
@@ -216,7 +226,10 @@ const handleSimulatedPayment = async () => {
 >
   Simulate Payment (Success)
 </button>
+
     </div>
+    <Footer/>
+   </div>
   );
 };
 
