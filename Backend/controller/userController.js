@@ -6,7 +6,6 @@ const Course = require("../models/coursesModels");
 const SECRET_KEY = "8261ba19898d0dcdfe6c0c411df74b587b2f54538f5f451633b71e39f957cf01";
 const { OAuth2Client } = require("google-auth-library");
 
-const client = new OAuth2Client("YOUR_GOOGLE_CLIENT_ID700718330885-0jcg4hkik40jn9a1b7u5joskq68g4tlu.apps.googleusercontent.com");
 
 
 exports.registerUser = async (req, res) => {
